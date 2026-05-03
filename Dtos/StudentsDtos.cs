@@ -9,7 +9,7 @@ namespace LoginSystem.DTO
         public string FullName { get; set; }
         public string Email { get; set; }
     }
-      public class CreateStudentDto
+    public class CreateStudentDto
     {
         [Required]
         public string FirstName { get; set; }
@@ -21,13 +21,18 @@ namespace LoginSystem.DTO
         public string Email { get; set; }
 
         public string? Phone { get; set; }
+        public string? Address { get; set; }
     }
 
-     public class UpdateStudentDto
+    public class UpdateStudentDto
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string? Phone { get; set; }
+        public string? Address
+        {
+            get; set;
+        }
     }
 
 
