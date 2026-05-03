@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using LoginSystem.Models;
 
+
 namespace LoginSystem.Data
 {
     public class AppDbContext : DbContext
@@ -14,8 +15,13 @@ namespace LoginSystem.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
-        }
+            modelBuilder.Entity<Student>()
+                .HasIndex(s => s.Email)
+                .IsUnique();
+                        }
         // Tables
         public DbSet<User> Users { get; set; }
+        public DbSet<Student> Students { get; set; }
+
     }
 }
