@@ -5,7 +5,6 @@ using LoginSystem.DTO;
 using LoginSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 namespace LoginSystem.Controllers
 {

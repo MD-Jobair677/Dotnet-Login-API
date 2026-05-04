@@ -14,8 +14,17 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
-
-builder.Services.AddEndpointsApiExplorer();
+// CORS policy add
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowReactApp", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173") // React Vite default
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -70,8 +79,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+app.UseCors("AllowReactApp");
 
 app.UseAuthentication();
 app.UseAuthorization();
