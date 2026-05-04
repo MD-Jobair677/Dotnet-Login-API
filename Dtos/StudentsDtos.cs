@@ -6,8 +6,11 @@ namespace LoginSystem.DTO
     public class StudentResponseDto
     {
         public int Id { get; set; }
-        public string FullName { get; set; }
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string Email { get; set; }
+
+        public StudentProfileDto Profile { get; set; }
     }
     public class CreateStudentDto
     {
@@ -22,6 +25,8 @@ namespace LoginSystem.DTO
 
         public string? Phone { get; set; }
         public string? Address { get; set; }
+        public IFormFile? ProfileImage { get; set; }
+
     }
 
     public class UpdateStudentDto
@@ -29,13 +34,19 @@ namespace LoginSystem.DTO
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string? Phone { get; set; }
+        public IFormFile? ProfileImage { get; set; }
+
         public string? Address
         {
             get; set;
         }
     }
 
-
+    public class StudentProfileDto
+    {
+        public int Id { get; set; }
+        public string? ProfileImage { get; set; }
+    }
 
 
 }

@@ -5,7 +5,8 @@ using LoginSystem.DTO;
 using LoginSystem.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.EntityFrameworkCore;
 namespace LoginSystem.Controllers
 {
     [ApiController]
@@ -36,13 +37,15 @@ namespace LoginSystem.Controllers
         }
 
         [HttpPost("create/student")]
-        public IActionResult CreateStudent(CreateStudentDto dto)
+        public IActionResult CreateStudent([FromForm] CreateStudentDto dto)
         {
             var exists = _context.Students.Any(x => x.Email == dto.Email);
             if (exists)
             {
                 return BadRequest("Email already exists");
             }
+            var imagePath = FileUploadHelper.UploadImage(dto.ProfileImage,"students");
+
             var student = new Student
             {
                 FirstName = dto.FirstName,
@@ -50,20 +53,43 @@ namespace LoginSystem.Controllers
                 Email = dto.Email,
                 Phone = dto.Phone,
                 Address = dto.Address,
+                Profile = new StudentProfile
+                {
+                    ProfileImage = imagePath
+                }
+
             };
+
+
+
+
+
             _context.Students.Add(student);
             _context.SaveChanges();
             return Ok(new
             {
                 success = true,
                 message = "Student created successfully",
-                data = student
+                data = new StudentResponseDto
+                {
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    Email = student.Email,
+                    Profile = new StudentProfileDto
+                    {
+                        Id = student.Profile.Id,
+                        ProfileImage = student.Profile.ProfileImage
+                    }
+                }
             });
 
 
         }
 
         [HttpGet("{id}")]
+        [Authorize]
+
         public IActionResult GetStudentById(int id)
         {
             var student = _context.Students.FirstOrDefault(x => x.Id == id);
@@ -82,27 +108,71 @@ namespace LoginSystem.Controllers
 
 
         [HttpPut("update/{id}")]
-        public IActionResult UpdateStudent(int id, UpdateStudentDto dto)
+
+        public IActionResult UpdateStudent([FromForm] int id, [FromForm] UpdateStudentDto dto)
         {
-            var student = _context.Students.FirstOrDefault(x => x.Id == id);
+            var student = _context.Students
+                .Include(x => x.Profile)
+                .FirstOrDefault(x => x.Id == id);
 
             if (student == null)
             {
                 return NotFound("Student not found");
             }
 
+            // -------------------
+            // Student update
+            // -------------------
             student.FirstName = dto.FirstName;
             student.LastName = dto.LastName;
             student.Phone = dto.Phone;
             student.Address = dto.Address;
+
+            // -------------------
+            // PROFILE IMAGE LOGIC
+            // -------------------
+            if (dto.ProfileImage != null)
+            {
+                var newImagePath = FileUploadHelper.UploadImage(dto.ProfileImage,"students");
+
+                // delete old image
+                if (student.Profile != null)
+                {
+                    FileUploadHelper.DeleteImage(student.Profile.ProfileImage);
+                }
+
+                // update or create profile
+                if (student.Profile != null)
+                {
+                    student.Profile.ProfileImage = newImagePath;
+                }
+                else
+                {
+                    student.Profile = new StudentProfile
+                    {
+                        ProfileImage = newImagePath
+                    };
+                }
+            }
 
             _context.SaveChanges();
 
             return Ok(new
             {
                 success = true,
-                message = "Student updated successfully",
-                data = student
+                message = "Student created successfully",
+                data = new StudentResponseDto
+                {
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    Email = student.Email,
+                    Profile = new StudentProfileDto
+                    {
+                        Id = student.Profile.Id,
+                        ProfileImage = student.Profile.ProfileImage
+                    }
+                }
             });
         }
 
