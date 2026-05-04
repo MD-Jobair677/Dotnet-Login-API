@@ -54,15 +54,21 @@ namespace LoginSystem.Controllers
 
         private string GenerateToken(string useFirstName, string useLastName, string userEmail)
         {
+            var keyString = _config["Jwt:Key"];
+            if (string.IsNullOrEmpty(keyString))
+            {
+                throw new InvalidOperationException("Jwt:Key configuration is missing.");
+            }
             var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(_config["Jwt:Key"])
+                Encoding.UTF8.GetBytes(keyString)
             );
 
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, useFirstName,ClaimTypes.Email, userEmail)
+                new Claim(ClaimTypes.Name, useFirstName),
+                new Claim(ClaimTypes.Email, userEmail)
             };
 
             var token = new JwtSecurityToken(

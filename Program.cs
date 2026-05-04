@@ -16,7 +16,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 
 var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
@@ -51,18 +50,11 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Enter: Bearer {your token}"
     });
 
-    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(openApiDocument => new OpenApiSecurityRequirement
     {
         {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
+            new OpenApiSecuritySchemeReference("Bearer", openApiDocument),
+            new List<string>()
         }
     });
 });
@@ -87,9 +79,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-public class OpenApiReference
-{
-    public ReferenceType Type { get; set; }
-    public string Id { get; set; }
-}
