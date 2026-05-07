@@ -3,9 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using LoginSystem.Models;
-using LoginSystem.DTO;
-using LoginSystem.Data;
+using LoginSystem.Domain.Entities;
+using LoginSystem.Application.DTOs;
+using LoginSystem.Infrastructure.Persistence;
 using BCrypt.Net;
 
 namespace LoginSystem.Controllers

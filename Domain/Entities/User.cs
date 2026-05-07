@@ -1,4 +1,5 @@
-namespace LoginSystem.Models
+using LoginSystem.Domain.Entities;
+namespace LoginSystem.Domain.Entities
 {
     public class User
     {
@@ -13,5 +14,7 @@ namespace LoginSystem.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public ICollection<UserRole> UserRoles { get; set; }
+
     }
 }

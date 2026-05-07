@@ -1,4 +1,4 @@
-namespace LoginSystem.Models
+    namespace LoginSystem.Domain.Entities
 {
     public class StudentProfile
     {

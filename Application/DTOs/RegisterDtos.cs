@@ -1,4 +1,4 @@
-namespace LoginSystem.DTO
+namespace LoginSystem.Application.DTOs
 {
 
 

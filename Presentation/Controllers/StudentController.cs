@@ -1,8 +1,8 @@
 
 
-using LoginSystem.Data;
-using LoginSystem.DTO;
-using LoginSystem.Models;
+using LoginSystem.Infrastructure.Persistence;
+using LoginSystem.Application.DTOs;
+using LoginSystem.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -43,7 +43,7 @@ namespace LoginSystem.Controllers
             {
                 return BadRequest("Email already exists");
             }
-            var imagePath = FileUploadHelper.UploadImage(dto.ProfileImage,"students");
+            var imagePath = FileUploadHelper.UploadImage(dto.ProfileImage, "students");
 
             var student = new Student
             {
@@ -132,7 +132,7 @@ namespace LoginSystem.Controllers
             // -------------------
             if (dto.ProfileImage != null)
             {
-                var newImagePath = FileUploadHelper.UploadImage(dto.ProfileImage,"students");
+                var newImagePath = FileUploadHelper.UploadImage(dto.ProfileImage, "students");
 
                 // delete old image
                 if (student.Profile != null)
@@ -172,6 +172,35 @@ namespace LoginSystem.Controllers
                         ProfileImage = student.Profile.ProfileImage
                     }
                 }
+            });
+        }
+
+        [HttpDelete("delete/{id}")]
+        [Authorize]
+        public IActionResult DeleteStudent(int id)
+        {
+            var student = _context.Students
+                .Include(x => x.Profile)
+                .FirstOrDefault(x => x.Id == id);
+
+            if (student == null)
+            {
+                return NotFound("Student not found");
+            }
+
+            // delete profile image if exists
+            if (student.Profile != null && !string.IsNullOrWhiteSpace(student.Profile.ProfileImage))
+            {
+                FileUploadHelper.DeleteImage(student.Profile.ProfileImage);
+            }
+
+            _context.Students.Remove(student);
+            _context.SaveChanges();
+
+            return Ok(new
+            {
+                success = true,
+                message = "Student deleted successfully"
             });
         }
 

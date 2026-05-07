@@ -1,27 +1,27 @@
 
 using System.ComponentModel.DataAnnotations;
 
-namespace LoginSystem.DTO
+namespace LoginSystem.Application.DTOs
 {
     public class StudentResponseDto
     {
         public int Id { get; set; }
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
-        public string Email { get; set; }
+        public required  string FirstName { get; set; }
+        public required  string  LastName { get; set; }
+        public  required  string Email { get; set; }
 
         public StudentProfileDto Profile { get; set; }
     }
     public class CreateStudentDto
     {
         [Required]
-        public string FirstName { get; set; }
+        public required  string FirstName { get; set; }
 
         [Required]
-        public string LastName { get; set; }
+        public required  string LastName { get; set; }
 
         [Required]
-        public string Email { get; set; }
+        public required  string Email { get; set; }
 
         public string? Phone { get; set; }
         public string? Address { get; set; }
@@ -31,8 +31,8 @@ namespace LoginSystem.DTO
 
     public class UpdateStudentDto
     {
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
+        public required  string FirstName { get; set; }
+        public required  string LastName { get; set; }
         public string? Phone { get; set; }
         public IFormFile? ProfileImage { get; set; }
 
