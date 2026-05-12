@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-
+using LoginSystem.Infrastructure.Seeders;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -71,9 +71,17 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddAuthorization();
 
 
+
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
 
+    var context = services.GetRequiredService<AppDbContext>();
+
+    await PermissionSeeder.SeedAsync(context);
+}
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
