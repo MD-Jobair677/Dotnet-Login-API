@@ -41,6 +41,11 @@ namespace LoginSystem.Application.DTOs
         public required string Name { get; set; }
     }
 
+    public class UpdateRolePermissionsDto
+    {
+        public List<int> PermissionIds { get; set; } = new();
+    }
+
 
 
 

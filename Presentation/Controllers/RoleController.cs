@@ -140,6 +140,123 @@ public class RolesController : ControllerBase
             role.Name
         });
     }
+
+    // =========================
+    //  GET ROLE PERMISSION IDS
+    // =========================
+    [HttpGet("{id}/permissions")]
+    public async Task<IActionResult> GetRolePermissions(int id)
+    {
+        var roleExists = await _context.Roles.AnyAsync(r => r.Id == id);
+
+        if (!roleExists)
+            return NotFound("Role not found");
+
+        var permissionIds = await _context.RolePermissions
+            .Where(rp => rp.RoleId == id)
+            .Select(rp => rp.PermissionId)
+            .ToListAsync();
+
+        return Ok(permissionIds);
+    }
+
+    // =========================
+    //  REPLACE ROLE PERMISSIONS
+    // =========================
+    [HttpPut("{id}/permissions")]
+    public async Task<IActionResult> UpdateRolePermissions(int id, [FromBody] UpdateRolePermissionsDto dto)
+    {
+        var role = await _context.Roles
+            .Include(r => r.RolePermissions)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (role == null)
+            return NotFound("Role not found");
+
+        var permissionIds = dto.PermissionIds
+            .Distinct()
+            .ToList();
+
+        var existingPermissionIds = await _context.Permissions
+            .Where(p => permissionIds.Contains(p.Id))
+            .Select(p => p.Id)
+            .ToListAsync();
+
+        var missingPermissionIds = permissionIds
+            .Except(existingPermissionIds)
+            .ToList();
+
+        if (missingPermissionIds.Any())
+            return BadRequest(new { message = "Invalid permission ids", permissionIds = missingPermissionIds });
+
+        var currentPermissionIds = role.RolePermissions
+            .Select(rp => rp.PermissionId)
+            .ToList();
+
+        var permissionsToRemove = role.RolePermissions
+            .Where(rp => !permissionIds.Contains(rp.PermissionId))
+            .ToList();
+
+        var permissionIdsToAdd = permissionIds
+            .Except(currentPermissionIds)
+            .ToList();
+
+        if (permissionsToRemove.Any())
+        {
+            _context.RolePermissions.RemoveRange(permissionsToRemove);
+        }
+
+        foreach (var permissionId in permissionIdsToAdd)
+        {
+            _context.RolePermissions.Add(new RolePermission
+            {
+                RoleId = id,
+                PermissionId = permissionId
+            });
+        }
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            RoleId = id,
+            PermissionIds = permissionIds
+        });
+    }
+
+    // =========================
+    //  ADD SINGLE ROLE PERMISSION
+    // =========================
+    [HttpPost("{roleId}/permissions/{permissionId}")]
+    public async Task<IActionResult> AddRolePermission(int roleId, int permissionId)
+    {
+        var roleExists = await _context.Roles.AnyAsync(r => r.Id == roleId);
+
+        if (!roleExists)
+            return NotFound("Role not found");
+
+        var permissionExists = await _context.Permissions.AnyAsync(p => p.Id == permissionId);
+
+        if (!permissionExists)
+            return NotFound("Permission not found");
+
+        var alreadyAssigned = await _context.RolePermissions
+            .AnyAsync(rp => rp.RoleId == roleId && rp.PermissionId == permissionId);
+
+        if (alreadyAssigned)
+            return Ok("Permission already assigned to role");
+
+        _context.RolePermissions.Add(new RolePermission
+        {
+            RoleId = roleId,
+            PermissionId = permissionId
+        });
+
+        await _context.SaveChangesAsync();
+
+        return Ok("Permission assigned to role successfully");
+    }
+
     // =========================
     //  DELETE ROLE
     // =========================
