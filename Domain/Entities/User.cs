@@ -15,6 +15,11 @@ namespace LoginSystem.Domain.Entities
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<UserRole> UserRoles { get; set; }
+        // Assets
+
+        // Profile
+        public UserProfile? UserProfile { get; set; }
+        public UserAsset? UserAsset { get; set; }
 
     }
 }

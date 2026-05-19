@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using LoginSystem.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Internal;
+using System.Reflection.Emit;
 
 
 namespace LoginSystem.Infrastructure.Persistence
@@ -25,7 +26,7 @@ namespace LoginSystem.Infrastructure.Persistence
                         .HasForeignKey<StudentProfile>(p => p.StudentId)
                         .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<UserRole>()
-.HasKey(x => new { x.UserId, x.RoleId });
+                .HasKey(x => new { x.UserId, x.RoleId });
 
             modelBuilder.Entity<RolePermission>()
                 .HasKey(x => new { x.RoleId, x.PermissionId });
@@ -40,6 +41,22 @@ namespace LoginSystem.Infrastructure.Persistence
                 .WithMany(x => x.UserRoles)
                 .HasForeignKey(x => x.RoleId);
 
+            modelBuilder.Entity<UserProfile>()
+            .HasOne(x => x.User)
+            .WithOne(x => x.UserProfile)
+            .HasForeignKey<UserProfile>(up => up.UserId);
+
+
+
+            modelBuilder.Entity<UserAsset>()
+            .HasOne(x => x.User)
+            .WithOne(x => x.UserAsset)
+            .HasForeignKey<UserAsset>(ua => ua.UserId);
+
+
+
+
+
 
 
         }
@@ -51,6 +68,8 @@ namespace LoginSystem.Infrastructure.Persistence
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Permission> Permissions { get; set; }
         public DbSet<RolePermission> RolePermissions { get; set; }
+        public DbSet<UserProfile> UserProfiles { get; set; }
+        public DbSet<UserAsset> UserAssets { get; set; }
 
     }
 }

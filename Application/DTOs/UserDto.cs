@@ -42,4 +42,9 @@ namespace LoginSystem.Application.DTOs
 
         public List<int>? RoleIds { get; set; }
     }
+
+    public class UpdateUserRolesDto
+    {
+        public List<int> RoleIds { get; set; } = new();
+    }
 }

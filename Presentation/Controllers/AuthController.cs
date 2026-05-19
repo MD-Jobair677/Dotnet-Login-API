@@ -7,7 +7,8 @@ using LoginSystem.Domain.Entities;
 using LoginSystem.Application.DTOs;
 using LoginSystem.Infrastructure.Persistence;
 using BCrypt.Net;
-
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 namespace LoginSystem.Controllers
 {
     [ApiController]
@@ -36,7 +37,7 @@ namespace LoginSystem.Controllers
             if (!isValidPassword)
                 return Unauthorized("Wrong password");
 
-            var token = GenerateToken(user.Email, user.LastName, user.LastName);
+            var token = GenerateToken(user.FirstName, user.LastName, user.Email, user);
 
             var response = new ResponseDto
             {
@@ -44,7 +45,11 @@ namespace LoginSystem.Controllers
                 Message = "User registered successfully",
                 Data = new
                 {
-                    email = user.Email,
+                    userFirstName = user.FirstName,
+                    userLastName = user.LastName,
+                    userEmail = user.Email,
+
+
                     token = token
                 }
             };
@@ -52,7 +57,7 @@ namespace LoginSystem.Controllers
             return Ok(response);
         }
 
-        private string GenerateToken(string useFirstName, string useLastName, string userEmail)
+        private string GenerateToken(string userFirstName, string userLastName, string userEmail, User user)
         {
             var keyString = _config["Jwt:Key"];
             if (string.IsNullOrEmpty(keyString))
@@ -67,7 +72,9 @@ namespace LoginSystem.Controllers
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, useFirstName),
+                new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id)),
+                new Claim(ClaimTypes.Name, userFirstName),
+                new Claim(ClaimTypes.Surname, userLastName),
                 new Claim(ClaimTypes.Email, userEmail)
             };
 
@@ -106,7 +113,7 @@ namespace LoginSystem.Controllers
 
             _context.Users.Add(user);
             _context.SaveChanges();
-            var token = GenerateToken(user.Email, user.LastName, user.LastName);
+            var token = GenerateToken(user.FirstName, user.LastName, user.Email, user);
 
 
 
@@ -114,11 +121,11 @@ namespace LoginSystem.Controllers
             {
                 Success = true,
                 Message = "User registered successfully",
-                Data = new
+                Data = new RegisterDto
                 {
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    email = user.Email,
+                    Email = user.Email,
                     token = token
                 }
             };
@@ -126,8 +133,90 @@ namespace LoginSystem.Controllers
             return Ok(response);
         }
 
+      [Authorize]
+[HttpPost("user-profile-update")]
+public IActionResult UpdateUserProfile([FromBody] UpdateUserProfileDto dto)
+{
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+    if (userId == null)
+        return Unauthorized();
+
+    var user = _context.Users
+        .Include(u => u.UserProfile)
+        .Include(u => u.UserAsset) // one-to-one
+        .FirstOrDefault(x => x.Id == int.Parse(userId));
+
+    if (user == null)
+        return NotFound("User not found");
+
+    // =====================
+    // USER UPDATE
+    // =====================
+    user.FirstName = dto.FirstName;
+    user.LastName = dto.LastName;
+
+    // =====================
+    // PROFILE UPSERT
+    // =====================
+    if (user.UserProfile == null)
+    {
+        user.UserProfile = new UserProfile
+        {
+            UserId = user.Id,
+            Phone = dto.Phone,
+            Address = dto.Address,
+            Gender = dto.Gender,
+            DateOfBirth = dto.DateOfBirth,
+            Avatar = dto.Avatar,
+            Bio = dto.Bio,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+    }
+    else
+    {
+        user.UserProfile.Phone = dto.Phone;
+        user.UserProfile.Address = dto.Address;
+        user.UserProfile.Gender = dto.Gender;
+        user.UserProfile.DateOfBirth = dto.DateOfBirth;
+        user.UserProfile.Avatar = dto.Avatar;
+        user.UserProfile.Bio = dto.Bio;
+        user.UserProfile.UpdatedAt = DateTime.UtcNow;
+    }
+
+    _context.SaveChanges();
+
+    // =====================
+    // USER ASSET DTO (single)
+    // =====================
+    var asset = user.UserAsset == null ? null : new UserAssetDto
+    {
+        UserId = user.UserAsset.UserId,
+        AssetName = user.UserAsset.AssetName,
+        AssetType = user.UserAsset.AssetType,
+        Path = user.UserAsset.Path,
+        UpdatedAt = user.UserAsset.UpdatedAt
     };
 
+    return Ok(new
+    {
+        message = "User profile saved successfully",
+
+        user = new
+        {
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email
+        },
+
+        profile = user.UserProfile,
+
+        asset = asset
+    });
+}
+    };
 
 
 }
