@@ -17,11 +17,12 @@ namespace LoginSystem.Controllers
     {
         private readonly IConfiguration _config;
         private readonly AppDbContext _context;
-
-        public AuthController(AppDbContext context, IConfiguration config)
+        private readonly IImageNameService _imageNameService;
+        public AuthController(AppDbContext context, IConfiguration config, IImageNameService imageNameService)
         {
             _config = config;
             _context = context;
+            _imageNameService = imageNameService;
         }
 
         [HttpPost("login")]
@@ -133,89 +134,148 @@ namespace LoginSystem.Controllers
             return Ok(response);
         }
 
-      [Authorize]
-[HttpPost("user-profile-update")]
-public IActionResult UpdateUserProfile([FromBody] UpdateUserProfileDto dto)
-{
-    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-    if (userId == null)
-        return Unauthorized();
-
-    var user = _context.Users
-        .Include(u => u.UserProfile)
-        .Include(u => u.UserAsset) // one-to-one
-        .FirstOrDefault(x => x.Id == int.Parse(userId));
-
-    if (user == null)
-        return NotFound("User not found");
-
-    // =====================
-    // USER UPDATE
-    // =====================
-    user.FirstName = dto.FirstName;
-    user.LastName = dto.LastName;
-
-    // =====================
-    // PROFILE UPSERT
-    // =====================
-    if (user.UserProfile == null)
-    {
-        user.UserProfile = new UserProfile
+        // [Authorize]
+        [HttpPost("user-profile-update")]
+        public IActionResult UpdateUserProfile(
+    [FromForm] UpdateUserProfileDto dto,
+    [FromForm] UserAssetDto userAssetDto)
         {
-            UserId = user.Id,
-            Phone = dto.Phone,
-            Address = dto.Address,
-            Gender = dto.Gender,
-            DateOfBirth = dto.DateOfBirth,
-            Avatar = dto.Avatar,
-            Bio = dto.Bio,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
-        };
-    }
-    else
-    {
-        user.UserProfile.Phone = dto.Phone;
-        user.UserProfile.Address = dto.Address;
-        user.UserProfile.Gender = dto.Gender;
-        user.UserProfile.DateOfBirth = dto.DateOfBirth;
-        user.UserProfile.Avatar = dto.Avatar;
-        user.UserProfile.Bio = dto.Bio;
-        user.UserProfile.UpdatedAt = DateTime.UtcNow;
-    }
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-    _context.SaveChanges();
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
 
-    // =====================
-    // USER ASSET DTO (single)
-    // =====================
-    var asset = user.UserAsset == null ? null : new UserAssetDto
-    {
-        UserId = user.UserAsset.UserId,
-        AssetName = user.UserAsset.AssetName,
-        AssetType = user.UserAsset.AssetType,
-        Path = user.UserAsset.Path,
-        UpdatedAt = user.UserAsset.UpdatedAt
-    };
+            var user = _context.Users
+                .Include(u => u.UserProfile)
+                .Include(u => u.UserAsset)
+                .FirstOrDefault(x => x.Id == int.Parse(userId));
 
-    return Ok(new
-    {
-        message = "User profile saved successfully",
+            if (user == null)
+                return NotFound("User not found");
 
-        user = new
-        {
-            user.Id,
-            user.FirstName,
-            user.LastName,
-            user.Email
-        },
+            // ===================== USER UPDATE =====================
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
 
-        profile = user.UserProfile,
+            // ===================== PROFILE UPSERT =====================
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile
+                {
+                    Phone = dto.Phone,
+                    Address = dto.Address,
+                    Gender = dto.Gender,
+                    DateOfBirth = dto.DateOfBirth,
+                    Bio = dto.Bio,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+            }
+            else
+            {
+                user.UserProfile.Phone = dto.Phone;
+                user.UserProfile.Address = dto.Address;
+                user.UserProfile.Gender = dto.Gender;
+                user.UserProfile.DateOfBirth = dto.DateOfBirth;
+                user.UserProfile.Bio = dto.Bio;
+                user.UserProfile.UpdatedAt = DateTime.UtcNow;
+            }
 
-        asset = asset
-    });
-}
+            // ===================== IMAGE UPLOAD =====================
+            string? imageName = null;
+            string? imagePath = null;
+            string? imageType = null;
+
+            if (userAssetDto.Path != null)
+            {
+
+
+
+                // ===================== DELETE OLD IMAGE =====================
+                if (user.UserAsset != null && !string.IsNullOrEmpty(user.UserAsset.Path))
+                {
+                    FileUploadHelper.DeleteImage(user.UserAsset.Path);
+                }
+                // generate image name
+                imageName = _imageNameService.GenerateImageName(userAssetDto.Path.FileName);
+
+                // upload file
+                imagePath = FileUploadHelper.UploadImage(
+                    userAssetDto.Path,
+                    "user",
+                    imageName,
+                     new[] { ".jpg", ".png", ".jpeg", ".webp" }, 2
+                );
+
+                // get extension
+                imageType = _imageNameService.GetImageExtension(userAssetDto.Path.FileName);
+            }
+
+            // ===================== USER ASSET UPSERT =====================
+            if (imagePath != null)
+            {
+                if (user.UserAsset == null)
+                {
+                    user.UserAsset = new UserAsset
+                    {
+                        AssetName = imageName,
+                        AssetType = imageType,
+                        Path = imagePath,
+                        CreatedAt = DateTime.UtcNow,
+                        UpdatedAt = DateTime.UtcNow
+                    };
+                }
+                else
+                {
+                    user.UserAsset.AssetName = imageName;
+                    user.UserAsset.AssetType = imageType;
+                    user.UserAsset.Path = imagePath;
+                    user.UserAsset.UpdatedAt = DateTime.UtcNow;
+                }
+            }
+
+            // ===================== SAVE =====================
+            _context.SaveChanges();
+
+            // ===================== RESPONSE =====================
+            var asset = user.UserAsset == null
+                ? null
+                : new
+                {
+                    user.UserAsset.AssetName,
+                    user.UserAsset.AssetType,
+                    user.UserAsset.Path,
+                    user.UserAsset.UpdatedAt
+                };
+
+            var profile = user.UserProfile == null
+                ? null
+                : new
+                {
+                    user.UserProfile.Phone,
+                    user.UserProfile.Address,
+                    user.UserProfile.Gender,
+                    user.UserProfile.DateOfBirth,
+                    user.UserProfile.Bio
+                };
+
+            return Ok(new
+            {
+                message = "User profile updated successfully",
+
+                user = new
+                {
+                    user.Id,
+                    user.FirstName,
+                    user.LastName,
+                    user.Email
+                },
+
+                profile,
+                asset
+            });
+        }
+
     };
 
 

@@ -13,7 +13,7 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
-
+builder.Services.AddScoped<IImageNameService, ImageNameService>();
 // CORS policy add
 builder.Services.AddCors(options =>
 {
