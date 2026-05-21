@@ -30,6 +30,7 @@ public class RolesController : ControllerBase
         {
             Id = role.Id,
             Name = role.Name,
+            Description = role.Description,
 
             Permissions = role.RolePermissions
                 .Select(rp => rp.Permission.Name)
@@ -57,6 +58,7 @@ public class RolesController : ControllerBase
         {
             Id = role.Id,
             Name = role.Name,
+            Description = role.Description,
 
             Permissions = role.RolePermissions
                 .Select(rp => rp.Permission.Name)
@@ -84,7 +86,8 @@ public class RolesController : ControllerBase
 
         var role = new Role
         {
-            Name = dto.Name
+            Name = dto.Name.Trim(),
+            Description = dto.Description?.Trim()
         };
 
         _context.Roles.Add(role);
@@ -98,6 +101,7 @@ public class RolesController : ControllerBase
         var result = new RoleResponseDto
         {
             Name = createdRole.Name,
+            Description = createdRole.Description,
 
             Permissions = createdRole.RolePermissions
                 .Select(rp => rp.Permission.Name)
@@ -131,13 +135,15 @@ public class RolesController : ControllerBase
             return BadRequest("Role already exists");
 
         role.Name = dto.Name.Trim();
+        role.Description = dto.Description?.Trim();
 
         await _context.SaveChangesAsync();
 
         return Ok(new
         {
             role.Id,
-            role.Name
+            role.Name,
+            role.Description
         });
     }
 

@@ -135,7 +135,7 @@ namespace LoginSystem.Controllers
         }
 
         // [Authorize]
-        [HttpPost("user-profile-update")]
+        [HttpPut("user-profile-update")]
         public IActionResult UpdateUserProfile(
     [FromForm] UpdateUserProfileDto dto,
     [FromForm] UserAssetDto userAssetDto)

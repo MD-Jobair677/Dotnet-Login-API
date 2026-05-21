@@ -21,6 +21,8 @@ public class UsersController : ControllerBase
         var users = await _context.Users
             .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
+                    .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
             .OrderByDescending(u => u.CreatedAt)
             .ToListAsync();
 
@@ -33,6 +35,12 @@ public class UsersController : ControllerBase
             CreatedAt = user.CreatedAt,
             Roles = user.UserRoles
                 .Select(ur => ur.Role.Name)
+                .ToList(),
+            Permissions = user.UserRoles
+                .SelectMany(ur => ur.Role.RolePermissions)
+                .Select(rp => rp.Permission.Name)
+                .Distinct()
+                .OrderBy(permission => permission)
                 .ToList()
         }).ToList();
 

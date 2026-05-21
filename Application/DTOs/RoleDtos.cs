@@ -11,6 +11,7 @@ namespace LoginSystem.Application.DTOs
 
         public required string Name { get; set; }
 
+        public string? Description { get; set; }
 
         public List<string> Permissions { get; set; } = new();
 
@@ -22,6 +23,7 @@ namespace LoginSystem.Application.DTOs
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
 
         public List<string> Permissions { get; set; } = new();
     }
@@ -29,16 +31,19 @@ namespace LoginSystem.Application.DTOs
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
 
         public List<string> Permissions { get; set; } = new();
     }
     public class CreateRoleDto
     {
         public required string Name { get; set; }
+        public string? Description { get; set; }
     }
     public class UpdateRoleDto
     {
         public required string Name { get; set; }
+        public string? Description { get; set; }
     }
 
     public class UpdateRolePermissionsDto
