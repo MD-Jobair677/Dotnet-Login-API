@@ -15,9 +15,17 @@ namespace LoginSystem.Application.DTOs
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
         public string Email { get; set; }
         public string Password { get; set; }
+    }
+    
+    public class RegisterResponseDto
+    {
+        required
+        public string FirstName { get; set; }
+        required
+        public string LastName { get; set; }
+        public string Email { get; set; }
         public string token { get; set; }
     }
     public class UpdateUserProfileDto

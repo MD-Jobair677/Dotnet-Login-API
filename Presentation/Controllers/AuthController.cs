@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Collections.Generic;
 using LoginSystem.Domain.Entities;
 using LoginSystem.Application.DTOs;
 using LoginSystem.Infrastructure.Persistence;
@@ -66,11 +67,11 @@ namespace LoginSystem.Controllers
             return Ok(response);
         }
 
-        private string GenerateToken(
-      string userFirstName,
-      string userLastName,
-      string userEmail,
-      User user)
+private string GenerateToken(
+       string userFirstName,
+       string userLastName,
+       string userEmail,
+       User user)
         {
             var keyString = _config["Jwt:Key"];
 
@@ -90,50 +91,36 @@ namespace LoginSystem.Controllers
                 SecurityAlgorithms.HmacSha256
             );
 
-            // CHANGE HERE
-            var claims = new List<Claim>
-    {
-        new Claim(
-            ClaimTypes.NameIdentifier,
-            Convert.ToString(user.Id)
-        ),
+            var claims = new List<Claim>();
 
-        new Claim(
-            ClaimTypes.Name,
-            userFirstName
-        ),
+            if (!string.IsNullOrEmpty(userFirstName))
+                claims.Add(new Claim(ClaimTypes.Name, userFirstName));
 
-        new Claim(
-            ClaimTypes.Surname,
-            userLastName
-        ),
+            if (!string.IsNullOrEmpty(userLastName))
+                claims.Add(new Claim(ClaimTypes.Surname, userLastName));
 
-        new Claim(
-            ClaimTypes.Email,
-            userEmail
-        )
-    };
+            if (!string.IsNullOrEmpty(userEmail))
+                claims.Add(new Claim(ClaimTypes.Email, userEmail));
+
+            if (user?.Id > 0)
+                claims.Add(new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id)));
 
             // ROLE + PERMISSION CLAIMS
-            foreach (var userRole in user.UserRoles)
+            if (user?.UserRoles != null)
             {
-                // ROLE
-                claims.Add(
-                    new Claim(
-                        ClaimTypes.Role,
-                        userRole.Role.Name
-                    )
-                );
-
-                // PERMISSIONS
-                foreach (var rolePermission in userRole.Role.RolePermissions)
+                foreach (var userRole in user.UserRoles)
                 {
-                    claims.Add(
-                        new Claim(
-                            "Permission",
-                            rolePermission.Permission.Name
-                        )
-                    );
+                    if (userRole?.Role?.Name != null)
+                        claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+
+                    if (userRole?.Role?.RolePermissions != null)
+                    {
+                        foreach (var rolePermission in userRole.Role.RolePermissions)
+                        {
+                            if (rolePermission?.Permission?.Name != null)
+                                claims.Add(new Claim("Permission", rolePermission.Permission.Name));
+                        }
+                    }
                 }
             }
 
@@ -171,6 +158,7 @@ namespace LoginSystem.Controllers
 
             _context.Users.Add(user);
             _context.SaveChanges();
+            user.UserRoles = new List<UserRole>(); // Initialize empty roles
             var token = GenerateToken(user.FirstName, user.LastName, user.Email, user);
 
 
@@ -179,11 +167,13 @@ namespace LoginSystem.Controllers
             {
                 Success = true,
                 Message = "User registered successfully",
-                Data = new RegisterDto
+                Data = new
                 {
-                    FirstName = user.FirstName,
-                    LastName = user.LastName,
-                    Email = user.Email,
+                    userFirstName = user.FirstName,
+                    userLastName = user.LastName,
+                    userEmail = user.Email,
+                    userRoles = new List<string>(),
+                    userPermissions = new List<string>(),
                     token = token
                 }
             };
@@ -211,6 +201,13 @@ namespace LoginSystem.Controllers
                 return NotFound("User not found");
 
             // ===================== USER UPDATE =====================
+            if (!string.IsNullOrEmpty(dto.FirstName))
+            {
+                return BadRequest("First name cannot be empty");
+            }if (!string.IsNullOrEmpty(dto.LastName))
+            {
+                return BadRequest("Last name cannot be empty");
+            }
             user.FirstName = dto.FirstName;
             user.LastName = dto.LastName;
 
