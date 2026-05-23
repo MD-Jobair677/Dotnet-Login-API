@@ -5,11 +5,12 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using LoginSystem.Infrastructure.Seeders;
+using LoginSystem.Infrastructure.Authorization;
+using Microsoft.AspNetCore.Authorization;
 var builder = WebApplication.CreateBuilder(args);
 
 
 builder.Services.AddControllers();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
@@ -69,8 +70,12 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddAuthorization();
-
-
+builder.Services.AddSingleton<
+    IAuthorizationHandler,
+    PermissionHandler>();
+builder.Services.AddSingleton<
+    IAuthorizationPolicyProvider,
+    PermissionPolicyProvider>();
 
 var app = builder.Build();
 app.UseStaticFiles();

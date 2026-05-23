@@ -6,6 +6,7 @@ using LoginSystem.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LoginSystem.Infrastructure.Authorization;
 namespace LoginSystem.Controllers
 {
     [ApiController]
@@ -22,7 +23,8 @@ namespace LoginSystem.Controllers
 
         [HttpGet("all")]
         [Authorize]
-
+        // [Authorize(Roles = "admin")]
+        [Permission("Role.Create")]
         public IActionResult GetAllStudents()
         {
             var students = _context.Students.ToList();
@@ -88,7 +90,7 @@ namespace LoginSystem.Controllers
 
         [HttpGet("{id}")]
         [Authorize]
-
+        [Authorize(Roles = "Admin")]
         public IActionResult GetStudentById(int id)
         {
             var student = _context.Students.FirstOrDefault(x => x.Id == id);

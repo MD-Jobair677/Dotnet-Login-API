@@ -28,8 +28,12 @@ namespace LoginSystem.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] LoginDto request)
         {
-            var user = _context.Users.FirstOrDefault(x => x.Email == request.Email);
-
+            var user = _context.Users
+                        .Include(u => u.UserRoles)
+                        .ThenInclude(ur => ur.Role)
+                         .ThenInclude(r => r.RolePermissions)
+                        .ThenInclude(rp => rp.Permission)
+                         .FirstOrDefault(x => x.Email == request.Email);
             if (user == null)
                 return Unauthorized("User not found");
 
@@ -49,8 +53,12 @@ namespace LoginSystem.Controllers
                     userFirstName = user.FirstName,
                     userLastName = user.LastName,
                     userEmail = user.Email,
-
-
+                    userRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                    userPermissions = user.UserRoles
+                        .SelectMany(ur => ur.Role.RolePermissions)
+                        .Select(rp => rp.Permission.Name)
+                        .Distinct()
+                        .ToList(),
                     token = token
                 }
             };
@@ -58,26 +66,76 @@ namespace LoginSystem.Controllers
             return Ok(response);
         }
 
-        private string GenerateToken(string userFirstName, string userLastName, string userEmail, User user)
+        private string GenerateToken(
+      string userFirstName,
+      string userLastName,
+      string userEmail,
+      User user)
         {
             var keyString = _config["Jwt:Key"];
+
             if (string.IsNullOrEmpty(keyString))
             {
-                throw new InvalidOperationException("Jwt:Key configuration is missing.");
+                throw new InvalidOperationException(
+                    "Jwt:Key configuration is missing."
+                );
             }
+
             var key = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(keyString)
             );
 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var creds = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
 
-            var claims = new[]
+            // CHANGE HERE
+            var claims = new List<Claim>
+    {
+        new Claim(
+            ClaimTypes.NameIdentifier,
+            Convert.ToString(user.Id)
+        ),
+
+        new Claim(
+            ClaimTypes.Name,
+            userFirstName
+        ),
+
+        new Claim(
+            ClaimTypes.Surname,
+            userLastName
+        ),
+
+        new Claim(
+            ClaimTypes.Email,
+            userEmail
+        )
+    };
+
+            // ROLE + PERMISSION CLAIMS
+            foreach (var userRole in user.UserRoles)
             {
-                new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id)),
-                new Claim(ClaimTypes.Name, userFirstName),
-                new Claim(ClaimTypes.Surname, userLastName),
-                new Claim(ClaimTypes.Email, userEmail)
-            };
+                // ROLE
+                claims.Add(
+                    new Claim(
+                        ClaimTypes.Role,
+                        userRole.Role.Name
+                    )
+                );
+
+                // PERMISSIONS
+                foreach (var rolePermission in userRole.Role.RolePermissions)
+                {
+                    claims.Add(
+                        new Claim(
+                            "Permission",
+                            rolePermission.Permission.Name
+                        )
+                    );
+                }
+            }
 
             var token = new JwtSecurityToken(
                 issuer: _config["Jwt:Issuer"],
@@ -87,10 +145,9 @@ namespace LoginSystem.Controllers
                 signingCredentials: creds
             );
 
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            return new JwtSecurityTokenHandler()
+                .WriteToken(token);
         }
-
-
 
 
         [HttpPost("register")]
