@@ -76,7 +76,7 @@ builder.Services.AddSingleton<
 builder.Services.AddSingleton<
     IAuthorizationPolicyProvider,
     PermissionPolicyProvider>();
-
+builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
 app.UseStaticFiles();
 

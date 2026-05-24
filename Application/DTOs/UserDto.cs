@@ -49,4 +49,16 @@ namespace LoginSystem.Application.DTOs
     {
         public List<int> RoleIds { get; set; } = new();
     }
+
+    public class ForgotPasswordDto
+    {
+        public string Email { get; set; }
+    }
+
+    public class ResetPasswordDto
+{
+    public string Token { get; set; }
+
+    public string NewPassword { get; set; }
+}
 }

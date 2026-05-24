@@ -12,7 +12,9 @@ namespace LoginSystem.Domain.Entities
         public string Email { get; set; } = string.Empty;
 
         public string PasswordHash { get; set; } = string.Empty;
+        public string? PasswordResetToken { get; set; }
 
+        public DateTime? PasswordResetTokenExpiry { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<UserRole> UserRoles { get; set; }
         // Assets
