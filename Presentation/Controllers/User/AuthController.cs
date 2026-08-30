@@ -19,166 +19,36 @@ namespace BulkMail.Controllers
         private readonly IConfiguration _config;
         private readonly AppDbContext _context;
         private readonly IImageNameService _imageNameService;
-        public AuthController(AppDbContext context, IConfiguration config, IImageNameService imageNameService)
+        private readonly IAuthService _authService;
+        public AuthController(AppDbContext context, IConfiguration config, IImageNameService imageNameService, IAuthService authService)
         {
             _config = config;
             _context = context;
             _imageNameService = imageNameService;
+            _authService = authService;
         }
 
         [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginDto request)
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
-            var user = _context.Users
-                        .Include(u => u.UserRoles)
-                        .ThenInclude(ur => ur.Role)
-                         .ThenInclude(r => r.RolePermissions)
-                        .ThenInclude(rp => rp.Permission)
-                         .FirstOrDefault(x => x.Email == request.Email);
-            if (user == null)
-                return Unauthorized("User not found");
+            var result = await _authService.LoginAsync(request);
 
-            bool isValidPassword = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
+            if (!result.Success)
+                return Unauthorized(result.Message);
 
-            if (!isValidPassword)
-                return Unauthorized("Wrong password");
-
-            var token = GenerateToken(user.FirstName, user.LastName, user.Email, user);
-
-            var response = new ResponseDto
-            {
-                Success = true,
-                Message = "User registered successfully",
-                Data = new
-                {
-                    userFirstName = user.FirstName,
-                    userLastName = user.LastName,
-                    userEmail = user.Email,
-                    userRoles = user.UserRoles.Select(ur => ur.Role.Name).ToList(),
-                    userPermissions = user.UserRoles
-                        .SelectMany(ur => ur.Role.RolePermissions)
-                        .Select(rp => rp.Permission.Name)
-                        .Distinct()
-                        .ToList(),
-                    token = token
-                }
-            };
-
-            return Ok(response);
-        }
-
-private string GenerateToken(
-       string userFirstName,
-       string userLastName,
-       string userEmail,
-       User user)
-        {
-            var keyString = _config["Jwt:Key"];
-
-            if (string.IsNullOrEmpty(keyString))
-            {
-                throw new InvalidOperationException(
-                    "Jwt:Key configuration is missing."
-                );
-            }
-
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(keyString)
-            );
-
-            var creds = new SigningCredentials(
-                key,
-                SecurityAlgorithms.HmacSha256
-            );
-
-            var claims = new List<Claim>();
-
-            if (!string.IsNullOrEmpty(userFirstName))
-                claims.Add(new Claim(ClaimTypes.Name, userFirstName));
-
-            if (!string.IsNullOrEmpty(userLastName))
-                claims.Add(new Claim(ClaimTypes.Surname, userLastName));
-
-            if (!string.IsNullOrEmpty(userEmail))
-                claims.Add(new Claim(ClaimTypes.Email, userEmail));
-
-            if (user?.Id > 0)
-                claims.Add(new Claim(ClaimTypes.NameIdentifier, Convert.ToString(user.Id)));
-
-            // ROLE + PERMISSION CLAIMS
-            if (user?.UserRoles != null)
-            {
-                foreach (var userRole in user.UserRoles)
-                {
-                    if (userRole?.Role?.Name != null)
-                        claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
-
-                    if (userRole?.Role?.RolePermissions != null)
-                    {
-                        foreach (var rolePermission in userRole.Role.RolePermissions)
-                        {
-                            if (rolePermission?.Permission?.Name != null)
-                                claims.Add(new Claim("Permission", rolePermission.Permission.Name));
-                        }
-                    }
-                }
-            }
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddHours(1),
-                signingCredentials: creds
-            );
-
-            return new JwtSecurityTokenHandler()
-                .WriteToken(token);
+            return Ok(result);
         }
 
 
         [HttpPost("register")]
-        public IActionResult RegisterUser(RegisterDto dto)
+        public async Task<IActionResult> RegisterUser(RegisterDto dto)
         {
-            // check email exists
-            var userExists = _context.Users.FirstOrDefault(x => x.Email == dto.Email);
-            if (userExists != null)
-            {
-                return BadRequest("Email already exists");
-            }
+            var result = await _authService.RegisterAsync(dto);
 
-            // create user
-            var user = new User
-            {
-                FirstName = dto.FirstName,
-                LastName = dto.LastName,
-                Email = dto.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password)
-            };
+            if (!result.Success)
+                return BadRequest(result.Message);
 
-            _context.Users.Add(user);
-            _context.SaveChanges();
-            user.UserRoles = new List<UserRole>(); // Initialize empty roles
-            var token = GenerateToken(user.FirstName, user.LastName, user.Email, user);
-
-
-
-            var response = new ResponseDto
-            {
-                Success = true,
-                Message = "User registered successfully",
-                Data = new
-                {
-                    userFirstName = user.FirstName,
-                    userLastName = user.LastName,
-                    userEmail = user.Email,
-                    userRoles = new List<string>(),
-                    userPermissions = new List<string>(),
-                    token = token
-                }
-            };
-
-            return Ok(response);
+            return Ok(result);
         }
 
         // [Authorize]

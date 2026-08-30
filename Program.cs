@@ -9,12 +9,15 @@ using BulkMail.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Scalar.AspNetCore;
 using FluentValidation;
+using FluentValidation.AspNetCore;
 using BulkMail.Application.User.Validators;
+using AutoMapper;
+using BulkMail.Infrastructure.Mappings;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers()
-    .AddFluentValidationAutoValidation();
+builder.Services.AddControllers();
+builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
@@ -82,6 +85,7 @@ builder.Services.AddSingleton<
     IAuthorizationPolicyProvider,
     PermissionPolicyProvider>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {

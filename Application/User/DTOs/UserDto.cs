@@ -21,6 +21,16 @@ namespace BulkMail.Application.DTOs
         public List<string> Permissions { get; set; } = new();
     }
 
+    public class UserAuthResponseDto
+    {
+        public string? UserFirstName { get; set; }
+        public string? UserLastName { get; set; }
+        public string UserEmail { get; set; } = string.Empty;
+        public List<string> UserRoles { get; set; } = new();
+        public List<string> UserPermissions { get; set; } = new();
+        public string Token { get; set; } = string.Empty;
+    }
+
     public class CreateUserDto
     {
         public required string FirstName { get; set; }
