@@ -52,6 +52,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddOpenApi(options =>
 {
+    options.ShouldInclude = apiDescription => true;
     options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
         document.Components ??= new();
