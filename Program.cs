@@ -8,10 +8,14 @@ using BulkMail.Infrastructure.Seeders;
 using BulkMail.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Scalar.AspNetCore;
+using FluentValidation;
+using BulkMail.Application.User.Validators;
 var builder = WebApplication.CreateBuilder(args);
 
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<RegisterDtoValidator>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
