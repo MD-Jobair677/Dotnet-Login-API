@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace LoginSystem.Application.DTOs
+namespace BulkMail.Application.DTOs
 {
 
 

@@ -4,13 +4,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Collections.Generic;
-using LoginSystem.Domain.Entities;
-using LoginSystem.Application.DTOs;
-using LoginSystem.Infrastructure.Persistence;
+using BulkMail.Domain.Entities;
+using BulkMail.Application.DTOs;
+using BulkMail.Infrastructure.Persistence;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-namespace LoginSystem.Controllers
+namespace BulkMail.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

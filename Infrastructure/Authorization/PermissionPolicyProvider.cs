@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 
-namespace LoginSystem.Infrastructure.Authorization
+namespace BulkMail.Infrastructure.Authorization
 {
     public class PermissionPolicyProvider
         : DefaultAuthorizationPolicyProvider

@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LoginSystem.Infrastructure.Persistence;
-using LoginSystem.Domain.Entities;
-using LoginSystem.Application.DTOs;
+using BulkMail.Infrastructure.Persistence;
+using BulkMail.Domain.Entities;
+using BulkMail.Application.DTOs;
 
 [ApiController]
 [Route("api/[controller]")]

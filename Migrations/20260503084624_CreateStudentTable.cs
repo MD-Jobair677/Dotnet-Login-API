@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace LoginSystem.Migrations
+namespace BulkMail.Migrations
 {
     /// <inheritdoc />
     public partial class CreateStudentTable : Migration

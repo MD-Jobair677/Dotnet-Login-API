@@ -1,6 +1,6 @@
-using LoginSystem.Application.DTOs;
-using LoginSystem.Domain.Entities;
-using LoginSystem.Infrastructure.Persistence;
+using BulkMail.Application.DTOs;
+using BulkMail.Domain.Entities;
+using BulkMail.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

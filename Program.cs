@@ -1,12 +1,13 @@
-using LoginSystem.Infrastructure.Persistence;
+using BulkMail.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using LoginSystem.Infrastructure.Seeders;
-using LoginSystem.Infrastructure.Authorization;
+using BulkMail.Infrastructure.Seeders;
+using BulkMail.Infrastructure.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -48,26 +49,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 });
 
-builder.Services.AddSwaggerGen(options =>
-{
-    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "Enter: Bearer {your token}"
-    });
 
-    options.AddSecurityRequirement(openApiDocument => new OpenApiSecurityRequirement
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
     {
+        document.Components ??= new();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+
+        document.Components.SecuritySchemes.Add("Bearer", new OpenApiSecurityScheme
         {
-            new OpenApiSecuritySchemeReference("Bearer", openApiDocument),
-            new List<string>()
-        }
+            Type = SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT"
+        });
+
+        return Task.CompletedTask;
     });
 });
+
 
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<
@@ -78,6 +78,11 @@ builder.Services.AddSingleton<
     PermissionPolicyProvider>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 var app = builder.Build();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.MapScalarApiReference();
+}
 app.UseStaticFiles();
 
 
@@ -89,11 +94,7 @@ using (var scope = app.Services.CreateScope())
 
     await PermissionSeeder.SeedAsync(context);
 }
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
 // app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
 

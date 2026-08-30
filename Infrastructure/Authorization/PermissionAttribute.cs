@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace LoginSystem.Infrastructure.Authorization
+namespace BulkMail.Infrastructure.Authorization
 {
     public class PermissionAttribute : AuthorizeAttribute
     {

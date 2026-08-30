@@ -1,8 +1,8 @@
-namespace LoginSystem.Domain.Entities;
+namespace BulkMail.Domain.Entities;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using LoginSystem.Domain.Entities;
+using BulkMail.Domain.Entities;
 public class UserAsset
 {
     [Key]

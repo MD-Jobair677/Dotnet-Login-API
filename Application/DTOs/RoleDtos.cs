@@ -1,10 +1,10 @@
 
 
 using System.ComponentModel.DataAnnotations;
-using LoginSystem.Application.DTOs;
+using BulkMail.Application.DTOs;
 
 
-namespace LoginSystem.Application.DTOs
+namespace BulkMail.Application.DTOs
 {
     public class RoleResponseDto
     {

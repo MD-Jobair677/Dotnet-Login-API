@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using LoginSystem.Domain.Entities;
+using BulkMail.Domain.Entities;
 using Microsoft.EntityFrameworkCore.Internal;
 using System.Reflection.Emit;
 
 
-namespace LoginSystem.Infrastructure.Persistence
+namespace BulkMail.Infrastructure.Persistence
 {
     public class AppDbContext : DbContext
     {

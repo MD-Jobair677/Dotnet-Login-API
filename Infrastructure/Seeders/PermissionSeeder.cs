@@ -1,8 +1,8 @@
-using LoginSystem.Domain.Entities;
-using LoginSystem.Infrastructure.Persistence;
+using BulkMail.Domain.Entities;
+using BulkMail.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
-namespace LoginSystem.Infrastructure.Seeders
+namespace BulkMail.Infrastructure.Seeders
 {
     public static class PermissionSeeder
     {

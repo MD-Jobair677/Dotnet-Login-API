@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace LoginSystem.Migrations
+namespace BulkMail.Migrations
 {
     /// <inheritdoc />
     public partial class AddPermissionTable : Migration

@@ -1,6 +1,6 @@
     using System.ComponentModel.DataAnnotations;
 
-    namespace LoginSystem.Domain.Entities
+    namespace BulkMail.Domain.Entities
     {
         public class Student
         {

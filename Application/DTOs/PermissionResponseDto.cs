@@ -1,4 +1,4 @@
-namespace LoginSystem.Application.DTOs
+namespace BulkMail.Application.DTOs
 {
     public class PermissionResponseDto
     {

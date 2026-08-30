@@ -1,8 +1,8 @@
 
-using LoginSystem.Infrastructure.Persistence;
+using BulkMail.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LoginSystem.Application.DTOs;
+using BulkMail.Application.DTOs;
 [ApiController]
 [Route("api/[controller]")]
 public class PermissionsController : ControllerBase

@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace LoginSystem.Migrations
+namespace BulkMail.Migrations
 {
     /// <inheritdoc />
     public partial class AddPasswordResetTokenPasswordResetTokenExpiryInUserTable : Migration

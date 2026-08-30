@@ -1,5 +1,5 @@
-using LoginSystem.Domain.Entities;
-namespace LoginSystem.Domain.Entities
+using BulkMail.Domain.Entities;
+namespace BulkMail.Domain.Entities
 {
     public class User
     {

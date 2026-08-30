@@ -1,13 +1,13 @@
 
 
-using LoginSystem.Infrastructure.Persistence;
-using LoginSystem.Application.DTOs;
-using LoginSystem.Domain.Entities;
+using BulkMail.Infrastructure.Persistence;
+using BulkMail.Application.DTOs;
+using BulkMail.Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LoginSystem.Infrastructure.Authorization;
-namespace LoginSystem.Controllers
+using BulkMail.Infrastructure.Authorization;
+namespace BulkMail.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
