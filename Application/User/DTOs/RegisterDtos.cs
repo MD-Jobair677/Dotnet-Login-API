@@ -13,9 +13,24 @@ namespace BulkMail.Application.DTOs
 
     public class RegisterDto
     {
+        [Required]
+        [MinLength(2)]
+        [MaxLength(100)]
         public string FirstName { get; set; }
+
+        [Required]
+        [MinLength(2)]
+        [MaxLength(100)]
         public string LastName { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [MaxLength(256)]
         public string Email { get; set; }
+
+        [Required]
+        [MinLength(6)]
+        [MaxLength(100)]
         public string Password { get; set; }
     }
     
@@ -62,7 +77,12 @@ namespace BulkMail.Application.DTOs
 
     public class LoginDto
     {
+        [Required]
+        [EmailAddress]
+        [MaxLength(256)]
         public string Email { get; set; }
+
+        [Required]
         public string Password { get; set; }
     }
 

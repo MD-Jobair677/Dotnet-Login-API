@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using BulkMail.Domain.Entities;
+using BulkMail.Domain.User.Entities;
 using Microsoft.EntityFrameworkCore.Internal;
-using System.Reflection.Emit;
+using System.Reflection;
+using BulkMail.Infrastructure.Persistence.Configurations.User;
 
 
 namespace BulkMail.Infrastructure.Persistence
@@ -14,9 +15,8 @@ namespace BulkMail.Infrastructure.Persistence
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
             modelBuilder.Entity<Student>()
                 .HasIndex(s => s.Email)
                 .IsUnique();
@@ -25,39 +25,23 @@ namespace BulkMail.Infrastructure.Persistence
                         .WithOne(p => p.Student)
                         .HasForeignKey<StudentProfile>(p => p.StudentId)
                         .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<UserRole>()
-                .HasKey(x => new { x.UserId, x.RoleId });
-
             modelBuilder.Entity<RolePermission>()
                 .HasKey(x => new { x.RoleId, x.PermissionId });
 
             modelBuilder.Entity<UserRole>()
+                .HasKey(x => new { x.UserId, x.RoleId });
+
+            modelBuilder.Entity<UserRole>()
                 .HasOne(x => x.User)
                 .WithMany(x => x.UserRoles)
-                .HasForeignKey(x => x.UserId);
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<UserRole>()
                 .HasOne(x => x.Role)
                 .WithMany(x => x.UserRoles)
-                .HasForeignKey(x => x.RoleId);
-
-            modelBuilder.Entity<UserProfile>()
-            .HasOne(x => x.User)
-            .WithOne(x => x.UserProfile)
-            .HasForeignKey<UserProfile>(up => up.UserId);
-
-
-
-            modelBuilder.Entity<UserAsset>()
-            .HasOne(x => x.User)
-            .WithOne(x => x.UserAsset)
-            .HasForeignKey<UserAsset>(ua => ua.UserId);
-
-
-
-
-
-
+                .HasForeignKey(x => x.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
 
         }
         // Tables

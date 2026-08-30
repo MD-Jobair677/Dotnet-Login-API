@@ -1,5 +1,5 @@
 using BulkMail.Application.DTOs;
-using BulkMail.Domain.Entities;
+using BulkMail.Domain.User.Entities;
 using BulkMail.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

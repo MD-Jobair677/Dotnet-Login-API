@@ -1,8 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BulkMail.Domain.Entities;
-namespace BulkMail.Domain.Entities
+using BulkMail.Domain.User.Entities;
+namespace BulkMail.Domain.User.Entities
 {
      public class UserProfile
     {

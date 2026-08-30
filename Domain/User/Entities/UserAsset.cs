@@ -1,8 +1,12 @@
-namespace BulkMail.Domain.Entities;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using BulkMail.Domain.Entities;
+using BulkMail.Domain.User.Entities;
+namespace BulkMail.Domain.User.Entities
+{
+    
+
+
 public class UserAsset
 {
     [Key]
@@ -29,3 +33,4 @@ public class UserAsset
     // Navigation Property
     public User User { get; set; } = null!;
 }
+} 

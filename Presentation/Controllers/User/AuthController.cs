@@ -4,7 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Collections.Generic;
-using BulkMail.Domain.Entities;
+using BulkMail.Domain.User.Entities;
 using BulkMail.Application.DTOs;
 using BulkMail.Infrastructure.Persistence;
 using BCrypt.Net;

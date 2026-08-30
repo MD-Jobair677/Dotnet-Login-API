@@ -1,4 +1,4 @@
-    namespace BulkMail.Domain.Entities
+namespace BulkMail.Domain.User.Entities
 {
     public class StudentProfile
     {

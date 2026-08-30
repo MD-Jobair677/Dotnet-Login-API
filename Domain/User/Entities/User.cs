@@ -1,23 +1,32 @@
-using BulkMail.Domain.Entities;
-namespace BulkMail.Domain.Entities
+using System.ComponentModel.DataAnnotations;
+using BulkMail.Domain.User.Entities;
+namespace BulkMail.Domain.User.Entities
 {
     public class User
     {
         public int Id { get; set; }
 
-        public string? FirstName { get; set; } = string.Empty;
+        [MaxLength(100)]
+        public string? FirstName { get; set; }
 
-        public string? LastName { get; set; } = string.Empty;
+        [MaxLength(100)]
+        public string? LastName { get; set; }
 
+        [Required]
+        [EmailAddress]
+        [MaxLength(256)]
         public string Email { get; set; } = string.Empty;
 
+        [Required]
+        [MaxLength(500)]
         public string PasswordHash { get; set; } = string.Empty;
+
+        [MaxLength(500)]
         public string? PasswordResetToken { get; set; }
 
         public DateTime? PasswordResetTokenExpiry { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public ICollection<UserRole> UserRoles { get; set; }
-        // Assets
 
         // Profile
         public UserProfile? UserProfile { get; set; }
