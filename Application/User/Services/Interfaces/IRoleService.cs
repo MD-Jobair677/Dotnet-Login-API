@@ -3,7 +3,7 @@ using EmsSystem.Common.ResponseDtos;
 
 public interface IRoleService
 {
-    Task<ApiResponse<List<RoleListResponseDto>>> GetRolesAsync();
+    Task<ApiResponse<List<RoleListResponseDto>>> GetRolesAsync(int page, int pageSize);
     Task<ApiResponse<RoleDetailResponseDto>> GetRoleAsync(int id);
     Task<ApiResponse<RoleResponseDto>> CreateRoleAsync(CreateRoleDto dto);
     Task<ApiResponse<RoleResponseDto>> UpdateRoleAsync(int id, UpdateRoleDto dto);

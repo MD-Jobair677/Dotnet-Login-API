@@ -13,12 +13,13 @@ public class RoleService : IRoleService
         _context = context;
     }
 
-    public async Task<ApiResponse<List<RoleListResponseDto>>> GetRolesAsync()
+    public async Task<ApiResponse<List<RoleListResponseDto>>> GetRolesAsync(int page, int pageSize)
     {
-        var roles = await _context.Roles
+        var query = _context.Roles
             .Include(r => r.RolePermissions)
-                .ThenInclude(rp => rp.Permission)
-            .ToListAsync();
+                .ThenInclude(rp => rp.Permission);
+
+        var (roles, meta) = await query.ToPaginatedListAsync(page, pageSize);
 
         var result = roles.Select(role => new RoleListResponseDto
         {
@@ -30,7 +31,7 @@ public class RoleService : IRoleService
                 .ToList()
         }).ToList();
 
-        return ApiResponse<List<RoleListResponseDto>>.SuccessResponse(result);
+        return ApiResponse<List<RoleListResponseDto>>.SuccessResponse(result, meta);
     }
 
     public async Task<ApiResponse<RoleDetailResponseDto>> GetRoleAsync(int id)
@@ -62,7 +63,7 @@ public class RoleService : IRoleService
             return ApiResponse<RoleResponseDto>.FailResponse("Role name required");
 
         var exists = await _context.Roles
-            .AnyAsync(x => x.Name == dto.Name);
+            .AnyAsync(x => x.Name.ToLower() == dto.Name.ToLower());
 
         if (exists)
             return ApiResponse<RoleResponseDto>.FailResponse("Role already exists");

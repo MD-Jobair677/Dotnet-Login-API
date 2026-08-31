@@ -8,9 +8,6 @@ namespace BulkMail.Infrastructure.Seeders
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            if (await context.Roles.AnyAsync())
-                return;
-
             var roles = new List<Role>
             {
                 new Role { Name = "SuperAdmin", Description = "Full access to the system" },
@@ -18,7 +15,15 @@ namespace BulkMail.Infrastructure.Seeders
                 new Role { Name = "User", Description = "Regular user" }
             };
 
-            await context.Roles.AddRangeAsync(roles);
+            foreach (var role in roles)
+            {
+                var exists = await context.Roles
+                    .AnyAsync(r => r.Name.ToLower() == role.Name.ToLower());
+
+                if (!exists)
+                    await context.Roles.AddAsync(role);
+            }
+
             await context.SaveChangesAsync();
         }
     }

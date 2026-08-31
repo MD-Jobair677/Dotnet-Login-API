@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BulkMail.Application.DTOs;
+using EmsSystem.Common.ResponseDtos;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -13,9 +14,9 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetRoles()
+    public async Task<IActionResult> GetRoles([FromQuery] PaginationQuery query)
     {
-        var result = await _roleService.GetRolesAsync();
+        var result = await _roleService.GetRolesAsync(query.Page, query.PageSize);
 
         if (!result.Success)
             return BadRequest(result);

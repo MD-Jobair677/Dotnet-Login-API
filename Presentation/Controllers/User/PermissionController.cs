@@ -1,8 +1,9 @@
 
 using BulkMail.Infrastructure.Persistence;
+using BulkMail.Application.DTOs;
+using EmsSystem.Common.ResponseDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BulkMail.Application.DTOs;
 [ApiController]
 [Route("api/[controller]")]
 public class PermissionsController : ControllerBase
@@ -18,9 +19,11 @@ public class PermissionsController : ControllerBase
     // GET ALL PERMISSIONS
     // =========================
     [HttpGet]
-    public async Task<IActionResult> GetPermissions()
+    public async Task<IActionResult> GetPermissions([FromQuery] PaginationQuery query)
     {
-        var permissions = await _context.Permissions.ToListAsync();
+        var queryable = _context.Permissions.AsQueryable();
+
+        var (permissions, meta) = await queryable.ToPaginatedListAsync(query.Page, query.PageSize);
 
         var result = permissions.Select(p => new PermissionResponseDto
         {
@@ -28,6 +31,6 @@ public class PermissionsController : ControllerBase
             Name = p.Name
         }).ToList();
 
-        return Ok(result);
+        return Ok(ApiResponse<List<PermissionResponseDto>>.SuccessResponse(result, meta));
     }
 }
