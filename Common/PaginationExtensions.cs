@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace EmsSystem.Common.ResponseDtos
+namespace BulkMail.Common.ResponseDtos
 {
     public static class PaginationExtensions
     {

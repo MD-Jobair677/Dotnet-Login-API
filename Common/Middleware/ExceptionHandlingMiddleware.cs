@@ -1,8 +1,8 @@
 using System.Net;
 using System.Text.Json;
-using EmsSystem.Common.ResponseDtos;
+using BulkMail.Common.ResponseDtos;
 
-namespace EmsSystem.Common.Middleware
+namespace BulkMail.Common.Middleware
 {
     public class ExceptionHandlingMiddleware
     {

@@ -1,5 +1,5 @@
 using BulkMail.Application.DTOs;
-using EmsSystem.Common.ResponseDtos;
+using BulkMail.Common.ResponseDtos;
 
 public interface IAuthService
 {

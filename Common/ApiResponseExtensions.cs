@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace BulkMail.Application.Common
+namespace BulkMail.Common.ResponseDtos
 {
     public static class ApiResponseExtensions
     {

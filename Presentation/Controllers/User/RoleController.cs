@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BulkMail.Application.DTOs;
-using EmsSystem.Common.ResponseDtos;
+using BulkMail.Common.ResponseDtos;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -1,4 +1,4 @@
-namespace BulkMail.Application.Common
+namespace BulkMail.Common.ResponseDtos
 {
     public class ServiceResult<T>
     {

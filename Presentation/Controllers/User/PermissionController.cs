@@ -1,7 +1,7 @@
 
 using BulkMail.Infrastructure.Persistence;
 using BulkMail.Application.DTOs;
-using EmsSystem.Common.ResponseDtos;
+using BulkMail.Common.ResponseDtos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 [ApiController]

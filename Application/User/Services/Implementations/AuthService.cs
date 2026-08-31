@@ -1,7 +1,7 @@
 using BulkMail.Application.DTOs;
 using BulkMail.Domain.User.Entities;
 using BulkMail.Infrastructure.Persistence;
-using EmsSystem.Common.ResponseDtos;
+using BulkMail.Common.ResponseDtos;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
