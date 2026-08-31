@@ -6,22 +6,18 @@ namespace BulkMail.Domain.User.Entities
     {
         public int Id { get; set; }
 
-        [MaxLength(100)]
+       
         public string? FirstName { get; set; }
 
-        [MaxLength(100)]
+        
         public string? LastName { get; set; }
 
-        [Required]
-        [EmailAddress]
-        [MaxLength(256)]
+      
         public string Email { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(500)]
+        
         public string PasswordHash { get; set; } = string.Empty;
 
-        [MaxLength(500)]
         public string? PasswordResetToken { get; set; }
 
         public DateTime? PasswordResetTokenExpiry { get; set; }

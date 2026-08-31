@@ -34,7 +34,7 @@ namespace BulkMail.Controllers
             var result = await _authService.LoginAsync(request);
 
             if (!result.Success)
-                return Unauthorized(result.Message);
+                return Unauthorized(result);
 
             return Ok(result);
         }
@@ -46,7 +46,7 @@ namespace BulkMail.Controllers
             var result = await _authService.RegisterAsync(dto);
 
             if (!result.Success)
-                return BadRequest(result.Message);
+                return BadRequest(result);
 
             return Ok(result);
         }

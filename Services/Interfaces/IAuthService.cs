@@ -1,7 +1,8 @@
 using BulkMail.Application.DTOs;
+using EmsSystem.Common.ResponseDtos;
 
 public interface IAuthService
 {
-    Task<AuthResult> LoginAsync(LoginDto dto);
-    Task<AuthResult> RegisterAsync(RegisterDto dto);
+    Task<ApiResponse<UserAuthResponseDto>> LoginAsync(LoginDto dto);
+    Task<ApiResponse<UserAuthResponseDto>> RegisterAsync(RegisterDto dto);
 }

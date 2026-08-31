@@ -1,6 +1,7 @@
 using BulkMail.Application.DTOs;
 using BulkMail.Domain.User.Entities;
 using BulkMail.Infrastructure.Persistence;
+using EmsSystem.Common.ResponseDtos;
 using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,7 +20,7 @@ public class AuthService : IAuthService
         _config = config;
     }
 
-    public async Task<AuthResult> LoginAsync(LoginDto dto)
+    public async Task<ApiResponse<UserAuthResponseDto>> LoginAsync(LoginDto dto)
     {
         var user = await _context.Users
             .Include(u => u.UserRoles)
@@ -29,30 +30,27 @@ public class AuthService : IAuthService
             .FirstOrDefaultAsync(x => x.Email == dto.Email);
 
         if (user == null)
-            return new AuthResult { Success = false, Message = "User not found" };
+            return ApiResponse<UserAuthResponseDto>.FailResponse("User not found");
 
         bool isValidPassword = BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash);
 
         if (!isValidPassword)
-            return new AuthResult { Success = false, Message = "Wrong password" };
+            return ApiResponse<UserAuthResponseDto>.FailResponse("Wrong password");
 
         var token = GenerateToken(user);
 
-        return new AuthResult
-        {
-            Success = true,
-            Message = "User registered successfully",
-            Data = BuildUserData(user, token)
-        };
+        return ApiResponse<UserAuthResponseDto>.SuccessResponse(
+            BuildUserData(user, token),
+            "Login successful");
     }
 
-    public async Task<AuthResult> RegisterAsync(RegisterDto dto)
+    public async Task<ApiResponse<UserAuthResponseDto>> RegisterAsync(RegisterDto dto)
     {
         var userExists = await _context.Users
             .FirstOrDefaultAsync(x => x.Email == dto.Email);
 
         if (userExists != null)
-            return new AuthResult { Success = false, Message = "Email already exists" };
+            return ApiResponse<UserAuthResponseDto>.FailResponse("Email already exists");
 
         var user = new User
         {
@@ -68,12 +66,9 @@ public class AuthService : IAuthService
         user.UserRoles = new List<UserRole>();
         var token = GenerateToken(user);
 
-        return new AuthResult
-        {
-            Success = true,
-            Message = "User registered successfully",
-            Data = BuildUserData(user, token)
-        };
+        return ApiResponse<UserAuthResponseDto>.SuccessResponse(
+            BuildUserData(user, token),
+            "User registered successfully");
     }
 
     private string GenerateToken(User user)
@@ -129,24 +124,24 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private static object BuildUserData(User user, string token)
+    private static UserAuthResponseDto BuildUserData(User user, string token)
     {
-        return new
+        return new UserAuthResponseDto
         {
-            userFirstName = user.FirstName,
-            userLastName = user.LastName,
-            userEmail = user.Email,
-            userRoles = user.UserRoles?
+            UserFirstName = user.FirstName,
+            UserLastName = user.LastName,
+            UserEmail = user.Email,
+            UserRoles = user.UserRoles?
                 .Select(ur => ur.Role?.Name)
                 .Where(name => name != null)
                 .ToList() ?? new List<string>(),
-            userPermissions = user.UserRoles?
+            UserPermissions = user.UserRoles?
                 .SelectMany(ur => ur.Role?.RolePermissions ?? new List<RolePermission>())
                 .Select(rp => rp.Permission?.Name)
                 .Where(name => name != null)
                 .Distinct()
                 .ToList() ?? new List<string>(),
-            token = token
+            Token = token
         };
     }
 }
