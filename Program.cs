@@ -86,6 +86,7 @@ builder.Services.AddSingleton<
     PermissionPolicyProvider>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IRoleService, RoleService>();
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
@@ -102,6 +103,7 @@ using (var scope = app.Services.CreateScope())
     var context = services.GetRequiredService<AppDbContext>();
 
     await PermissionSeeder.SeedAsync(context);
+    await RoleSeeder.SeedAsync(context);
 }
 
 // app.UseHttpsRedirection();
